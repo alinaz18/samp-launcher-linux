@@ -30,6 +30,17 @@
 
 ## Установка
 
+### Готовые пакеты
+
+На странице [Releases](https://github.com/alinaz18/samp-launcher-linux/releases/latest) лежат пакеты:
+
+- **Debian 13+, Ubuntu 26.04+:** `samp-launcher_*_all.deb`, установка: `sudo apt install ./samp-launcher_*_all.deb`
+- **Fedora:** `samp-launcher-*.noarch.rpm`, установка: `sudo dnf install ./samp-launcher-*.noarch.rpm`
+
+Для Debian 12, Ubuntu 22.04/24.04, Mint, Arch/CachyOS и openSUSE используйте установщик ниже.
+
+### Установщик (любой дистрибутив)
+
 ```bash
 git clone https://github.com/alinaz18/samp-launcher-linux.git
 cd samp-launcher-linux

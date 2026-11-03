@@ -30,6 +30,17 @@ Game and client files are **not** included in this repository.
 
 ## Installation
 
+### Packages
+
+The [Releases](https://github.com/alinaz18/samp-launcher-linux/releases/latest) page has ready-made packages:
+
+- **Debian 13+, Ubuntu 26.04+:** `samp-launcher_*_all.deb`, install with `sudo apt install ./samp-launcher_*_all.deb`
+- **Fedora:** `samp-launcher-*.noarch.rpm`, install with `sudo dnf install ./samp-launcher-*.noarch.rpm`
+
+For Debian 12, Ubuntu 22.04/24.04, Mint, Arch/CachyOS and openSUSE use the installer below.
+
+### Installer (any distribution)
+
 ```bash
 git clone https://github.com/alinaz18/samp-launcher-linux.git
 cd samp-launcher-linux

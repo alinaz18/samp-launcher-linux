@@ -57,15 +57,14 @@ install_deps() {
   say "Distribution / дистрибутив: $fam"
   case "$fam" in
     arch)
-      # Wine on Arch lives in [multilib] on older setups — enable it if this fails.
-      sudo_run pacman -S --needed --noconfirm python pyside6 wine winetricks \
-        || warn "pacman failed. If wine was not found, enable [multilib] in /etc/pacman.conf."
+      sudo_run pacman -S --needed --noconfirm python pyside6 wine winetricks curl \
+        || warn "pacman failed. Update the system (sudo pacman -Syu) and run ./install.sh again."
       ;;
     debian)
       sudo_run dpkg --add-architecture i386
       sudo_run apt-get update
-      sudo_run apt-get install -y python3 python3-venv python3-pip wine wine64 wine32:i386 \
-        || sudo_run apt-get install -y python3 python3-venv python3-pip wine
+      sudo_run apt-get install -y curl python3 python3-venv python3-pip wine wine64 wine32:i386 \
+        || sudo_run apt-get install -y curl python3 python3-venv python3-pip wine
       # PySide6 is packaged only in Debian 13+ / Ubuntu 26.04+; otherwise pip is used below.
       sudo_run apt-get install -y python3-pyside6.qtcore python3-pyside6.qtgui python3-pyside6.qtwidgets \
         || warn "PySide6 is not in your repositories — it will be installed via pip."

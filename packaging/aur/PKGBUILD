@@ -1,0 +1,19 @@
+# Maintainer: bagira818 <https://github.com/alinaz18>
+pkgname=samp-launcher-linux
+pkgver=1.5
+pkgrel=1
+pkgdesc="Native SA-MP launcher for Linux (Qt): server browser, favorites, custom GTA SA folder; runs the game via Wine"
+arch=('any')
+url="https://github.com/alinaz18/samp-launcher-linux"
+license=('MIT')
+depends=('python' 'pyside6' 'wine')
+optdepends=('winetricks: one-click DXVK and font installation')
+provides=('samp-launcher')
+conflicts=('samp-launcher')
+source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+  cd "$pkgname-$pkgver"
+  bash packaging/stage.sh "$pkgdir" /usr
+}
