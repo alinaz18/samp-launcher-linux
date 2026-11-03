@@ -37,7 +37,13 @@ The [Releases](https://github.com/alinaz18/samp-launcher-linux/releases/latest) 
 - **Debian 13+, Ubuntu 26.04+:** `samp-launcher_*_all.deb`, install with `sudo apt install ./samp-launcher_*_all.deb`
 - **Fedora:** `samp-launcher-*.noarch.rpm`, install with `sudo dnf install ./samp-launcher-*.noarch.rpm`
 
-For Debian 12, Ubuntu 22.04/24.04, Mint, Arch/CachyOS and openSUSE use the installer below.
+- **Arch, CachyOS, Manjaro:** build the package from this repository:
+  ```bash
+  git clone https://github.com/alinaz18/samp-launcher-linux.git
+  cd samp-launcher-linux/packaging/aur && makepkg -si
+  ```
+
+For Debian 12, Ubuntu 22.04/24.04, Mint and openSUSE use the installer below.
 
 ### Installer (any distribution)
 
