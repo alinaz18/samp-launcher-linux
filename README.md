@@ -1,5 +1,7 @@
 # SA-MP Launcher для Linux
 
+[![Checks](https://github.com/alinaz18/samp-launcher-linux/actions/workflows/ci.yml/badge.svg)](https://github.com/alinaz18/samp-launcher-linux/actions/workflows/ci.yml) [![Release](https://img.shields.io/github/v/release/alinaz18/samp-launcher-linux)](https://github.com/alinaz18/samp-launcher-linux/releases/latest) [![License: MIT](https://img.shields.io/github/license/alinaz18/samp-launcher-linux)](LICENSE)
+
 **Русский** | [English](README.en.md)
 
 Нативный лаунчер SA-MP для Linux: список серверов, избранное, ник и выбор папки с GTA San Andreas, в которую можно ставить моды. Интерфейс на Qt, выглядит как обычная программа KDE/GNOME. Есть русский и английский язык.

@@ -1,5 +1,7 @@
 # SA-MP Launcher for Linux
 
+[![Checks](https://github.com/alinaz18/samp-launcher-linux/actions/workflows/ci.yml/badge.svg)](https://github.com/alinaz18/samp-launcher-linux/actions/workflows/ci.yml) [![Release](https://img.shields.io/github/v/release/alinaz18/samp-launcher-linux)](https://github.com/alinaz18/samp-launcher-linux/releases/latest) [![License: MIT](https://img.shields.io/github/license/alinaz18/samp-launcher-linux)](LICENSE)
+
 [Русский](README.md) | **English**
 
 A native SA-MP launcher for Linux: server browser, favorites, nickname and a configurable GTA San Andreas folder where you can install mods. Qt interface that looks like a regular KDE/GNOME app. Russian and English.
