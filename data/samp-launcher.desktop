@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=SA-MP Launcher
+GenericName=SA-MP Launcher
+Comment=SA-MP launcher for GTA San Andreas
+Comment[ru]=Лаунчер SA-MP для GTA San Andreas
+Exec=@BIN@ %u
+Icon=samp-launcher
+Terminal=false
+Categories=Game;
+Keywords=samp;sa-mp;gta;san andreas;multiplayer;
+MimeType=x-scheme-handler/samp;
+StartupWMClass=samp-launcher
