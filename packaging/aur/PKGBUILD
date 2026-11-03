@@ -11,7 +11,7 @@ optdepends=('winetricks: one-click DXVK and font installation')
 provides=('samp-launcher')
 conflicts=('samp-launcher')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('SKIP')
+sha256sums=('d1a1438937871aed92ff4451863ff1eeaf02a96fc92ae0cb8b891a78bc6b514b')
 
 package() {
   cd "$pkgname-$pkgver"

@@ -1,0 +1,17 @@
+pkgbase = samp-launcher-linux
+	pkgdesc = Native SA-MP launcher for Linux (Qt): server browser, favorites, custom GTA SA folder; runs the game via Wine
+	pkgver = 1.5
+	pkgrel = 1
+	url = https://github.com/alinaz18/samp-launcher-linux
+	arch = any
+	license = MIT
+	depends = python
+	depends = pyside6
+	depends = wine
+	optdepends = winetricks: one-click DXVK and font installation
+	provides = samp-launcher
+	conflicts = samp-launcher
+	source = samp-launcher-linux-1.5.tar.gz::https://github.com/alinaz18/samp-launcher-linux/archive/refs/tags/v1.5.tar.gz
+	sha256sums = d1a1438937871aed92ff4451863ff1eeaf02a96fc92ae0cb8b891a78bc6b514b
+
+pkgname = samp-launcher-linux
