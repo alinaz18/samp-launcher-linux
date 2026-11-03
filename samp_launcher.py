@@ -34,7 +34,7 @@ except ImportError:
 
 from PySide6.QtCore import (QObject, Qt, QUrl, Signal, QTimer, QSortFilterProxyModel, QRegularExpression,
                             QLocale, QStandardPaths)
-from PySide6.QtGui import (QAction, QDesktopServices, QIcon, QGuiApplication, QStandardItem,
+from PySide6.QtGui import (QAction, QDesktopServices, QIcon, QImage, QGuiApplication, QStandardItem,
                            QStandardItemModel, QRegularExpressionValidator)
 from PySide6.QtWidgets import (
     QApplication, QCheckBox, QComboBox, QDialog, QFrame, QDialogButtonBox, QFileDialog, QFormLayout,
@@ -288,6 +288,147 @@ def query_players(host, port):
 
 
 # ---------------------------------------------------------------- background work
+
+ICON_NAME = "samp-launcher"
+ORIGINAL_ICON = "samp-launcher-original"   # иконка из samp.exe пользователя
+XDG_DATA = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local/share"))
+ICON_SIZES = (256, 128, 64, 48, 32, 16)
+
+
+def exe_icon_image(exe):
+    """Достать самую крупную иконку из ресурсов Windows-программы (.exe). QImage или None.
+
+    Логотип не входит в репозиторий: берётся из samp.exe, который уже есть у пользователя.
+    """
+    try:
+        d = Path(exe).read_bytes()
+        u16 = lambda o: struct.unpack_from("<H", d, o)[0]   # noqa: E731
+        u32 = lambda o: struct.unpack_from("<I", d, o)[0]   # noqa: E731
+        pe = u32(0x3C)
+        if d[pe:pe + 4] != b"PE\0\0":
+            return None
+        nsec, opt_size = u16(pe + 6), u16(pe + 20)
+        opt = pe + 24
+        ddir = opt + (96 if u16(opt) == 0x10B else 112)          # PE32 / PE32+
+        rsrc_rva = u32(ddir + 2 * 8)
+        secs = [(u32(o + 12), max(u32(o + 8), u32(o + 16)), u32(o + 20))
+                for o in (opt + opt_size + i * 40 for i in range(nsec))]
+
+        def off(rva):
+            for va, size, raw in secs:
+                if va <= rva < va + size:
+                    return rva - va + raw
+            raise ValueError("rva")
+        base = off(rsrc_rva)
+
+        def entries(o):
+            n = u16(o + 12) + u16(o + 14)
+            return [(u32(o + 16 + i * 8), u32(o + 20 + i * 8)) for i in range(n)]
+
+        def find(o, key):   # подкаталог/данные для числового id (None — первый)
+            for name, target in entries(o):
+                if key is None or (not name & 0x80000000 and name == key):
+                    return target
+            return None
+
+        def leaf(target):   # спуститься до данных (первый язык)
+            while target & 0x80000000:
+                target = entries(base + (target & 0x7FFFFFFF))[0][1]
+            e = base + target
+            return d[off(u32(e)):off(u32(e)) + u32(e + 4)]
+
+        types = base
+        groups = find(types, 14)    # RT_GROUP_ICON
+        icons = find(types, 3)      # RT_ICON
+        if groups is None or icons is None:
+            return None
+        grp = leaf(entries(base + (groups & 0x7FFFFFFF))[0][1])
+        best = None
+        for i in range(struct.unpack_from("<H", grp, 4)[0]):
+            w, h, colors, _, planes, bits, size, iid = struct.unpack_from("<BBBBHHIH", grp, 6 + i * 14)
+            score = ((w or 256) * (h or 256), bits)
+            if best is None or score > best[0]:
+                best = (score, (w, h, colors, planes, bits, iid))
+        w, h, colors, planes, bits, iid = best[1]
+        sub = find(base + (icons & 0x7FFFFFFF), iid)
+        if sub is None:
+            return None
+        img = leaf(sub)
+        if not img.startswith(b"\x89PNG"):   # BMP-иконка: обернуть в формат .ico
+            img = (struct.pack("<HHH", 0, 1, 1)
+                   + struct.pack("<BBBBHHII", w, h, colors, 0, planes, bits, len(img), 22) + img)
+        q = QImage.fromData(img)
+        return None if q.isNull() else q
+    except (OSError, ValueError, struct.error, IndexError, TypeError):
+        return None
+
+
+def _desktop_file():
+    """Ярлык лаунчера: пользовательский, а если его нет (установка пакетом) — системный."""
+    user = XDG_DATA / "applications" / "samp-launcher.desktop"
+    if user.exists():
+        return user, user
+    for d in os.environ.get("XDG_DATA_DIRS", "/usr/local/share:/usr/share").split(":"):
+        f = Path(d) / "applications" / "samp-launcher.desktop"
+        if f.exists():
+            return f, user     # системный не трогаем — кладём копию в ~/.local (она главнее)
+    return None, user
+
+
+def install_original_icon(gta_dir):
+    """Если в папке игры есть samp.exe — поставить его иконку лаунчеру (ярлык, док, окно).
+
+    Делается один раз для каждой версии samp.exe. Возвращает True, если иконка есть.
+    """
+    exe = Path(gta_dir) / "samp.exe" if gta_dir else None
+    icons = XDG_DATA / "icons" / "hicolor"
+    marker = DATA_DIR / "icon-source"
+    if not exe or not exe.is_file():
+        return (icons / "256x256" / "apps" / f"{ORIGINAL_ICON}.png").exists()
+    st = exe.stat()
+    stamp = f"{exe.resolve()}:{st.st_size}:{int(st.st_mtime)}"
+    try:
+        if marker.read_text() == stamp and (icons / "256x256/apps" / f"{ORIGINAL_ICON}.png").exists():
+            return True
+    except OSError:
+        pass
+    img = exe_icon_image(exe)
+    if img is None:
+        return False
+    for sz in ICON_SIZES:
+        dst = icons / f"{sz}x{sz}" / "apps" / f"{ORIGINAL_ICON}.png"
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        img.scaled(sz, sz, Qt.KeepAspectRatio, Qt.SmoothTransformation).save(str(dst), "PNG")
+    src, dst = _desktop_file()
+    if src:
+        lines = src.read_text(encoding="utf-8").splitlines()
+        new = [f"Icon={ORIGINAL_ICON}" if ln.startswith("Icon=") else ln for ln in lines]
+        if new != lines or src != dst:
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            dst.write_text("\n".join(new) + "\n", encoding="utf-8")
+    for cmd in (["gtk-update-icon-cache", "-f", "-t", str(icons)],
+                ["update-desktop-database", str(XDG_DATA / "applications")], ["kbuildsycoca6"]):
+        if shutil.which(cmd[0]):
+            subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    marker.write_text(stamp)
+    return True
+
+
+def app_icon():
+    """Иконка окна: из samp.exe пользователя, если есть, иначе своя из репозитория."""
+    for name in (ORIGINAL_ICON, ICON_NAME):
+        icon = QIcon()
+        for sz in ICON_SIZES:
+            f = XDG_DATA / "icons/hicolor" / f"{sz}x{sz}/apps/{name}.png"
+            if f.exists():
+                icon.addFile(str(f))
+        if icon.isNull():
+            icon = QIcon.fromTheme(name)
+        if not icon.isNull():
+            return icon
+    return QIcon.fromTheme("applications-games")
+
 
 class Bridge(QObject):
     info = Signal(str, object)       # key, dict | None
@@ -715,7 +856,8 @@ class MainWindow(QMainWindow):
         self.internet_list = []
 
         self.setWindowTitle(f"{APP_NAME} {APP_VERSION}")
-        self.setWindowIcon(QIcon.fromTheme("samp-launcher", QIcon.fromTheme("applications-games")))
+        install_original_icon(self.cfg.get("gta_dir"))
+        self.setWindowIcon(app_icon())
         self.resize(1000, 680)
 
         # toolbar
@@ -1107,6 +1249,8 @@ class MainWindow(QMainWindow):
 
     def open_settings(self):
         SettingsDialog(self.cfg, self.runner, self.bridge, self).exec()
+        if install_original_icon(self.cfg.get("gta_dir")):   # папку GTA могли поменять
+            self.setWindowIcon(app_icon())
         self.statusBar().showMessage(self.gta_status())
 
     def on_task_done(self, name, err):

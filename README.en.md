@@ -21,6 +21,7 @@ A native SA-MP launcher for Linux: server browser, favorites, nickname and a con
 - V-Sync is off by default, so FPS is not capped at the monitor refresh rate.
 - The *R6025 pure virtual function call* window after quitting with `/q` is closed automatically.
 - Russian and English interface (Settings → "Interface language").
+- If the GTA folder contains `samp.exe`, the launcher uses its original SA-MP icon for the menu entry, dock and window. The icon itself is not stored in this repository.
 
 ## Requirements
 
@@ -103,6 +104,7 @@ The first launch takes about a minute while the Wine prefix is prepared.
 | Launcher | `~/.local/share/samp-launcher-app/` |
 | Settings and favorites | `~/.config/samp-launcher/config.json` |
 | Wine prefix and log | `~/.local/share/samp-launcher/` |
+| Icon taken from `samp.exe` | `~/.local/share/icons/hicolor/*/apps/samp-launcher-original.png` |
 
 ## Uninstall
 

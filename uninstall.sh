@@ -11,7 +11,9 @@ CONF="${XDG_CONFIG_HOME:-$HOME/.config}"
 rm -rf "$DATA/samp-launcher-app"
 rm -f "$HOME/.local/bin/samp-launcher" \
       "$DATA/applications/samp-launcher.desktop" \
-      "$DATA/icons/hicolor/scalable/apps/samp-launcher.svg"
+      "$DATA/icons/hicolor/scalable/apps/samp-launcher.svg" \
+      "$DATA"/icons/hicolor/*/apps/samp-launcher-original.png \
+      "$DATA/samp-launcher/icon-source"
 update-desktop-database "$DATA/applications" 2>/dev/null || true
 
 if [ "${1:-}" = "--purge" ]; then
